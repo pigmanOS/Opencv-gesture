@@ -32,10 +32,10 @@ values = {
             5 : b'5\r\n',
 }
 
-# ser = serial.Serial()#打开串口
-# ser.baudrate = 9600
-# ser.port = "COM5"
-# ser.open()
+ser = serial.Serial()#打开串口
+ser.baudrate = 9600
+ser.port = "COM5"
+ser.open()
 
 
 def find_positon(img,ret):
@@ -58,70 +58,67 @@ def find_positon(img,ret):
         return lmslist
 
 
-with open("5.txt", "a") as file:
-    while True:
-        ret, img = cap.read()
-        lmslist = find_positon(img=img, ret=ret)
-        if len(lmslist):
-            fingers = []
-            if lmslist[1][1] < lmslist[0][1]:
-                for tid in fingertip:
-                    if tid == 4:  # 即大指拇,如果大拇指指尖X坐标大于大拇指第二个关节X坐标，即代表大拇指折叠
-                        if lmslist[tid][1] > lmslist[tid - 1][1]:
-                            fingers.append(1)
-                        else:
-                            fingers.append(0)
-                    else:         # 其他几个指头情况一样，如果指尖的Y坐标大于往下两个关节的Y坐标，即代表改关节弯曲
-                        if lmslist[tid][2] > lmslist[tid - 2][2]:
-                            fingers.append(1)
-                        else:
-                            fingers.append(0)
-            elif lmslist[1][1] == lmslist[0][1]:
-                for tid in fingertip:
-                    if tid == 4:  # 即大指拇,如果大拇指指尖X坐标大于大拇指第二个关节X坐标，即代表大拇指折叠
-                        if lmslist[tid][2] < lmslist[tid - 1][2]:
-                            fingers.append(1)
-                        else:
-                            fingers.append(0)
-                    else:         # 其他几个指头情况一样，如果指尖的Y坐标大于往下两个关节的Y坐标，即代表改关节弯曲
-                        if lmslist[tid][1] < lmslist[tid - 2][1]:
-                            fingers.append(1)
-                        else:
-                            fingers.append(0)
-            else:
-                for tid in fingertip:
-                    if tid == 4:  # 即大指拇,如果大拇指指尖X坐标大于大拇指第二个关节X坐标，即代表大拇指折叠
-                        if lmslist[tid][1] < lmslist[tid - 1][1]:
-                            fingers.append(1)
-                        else:
-                            fingers.append(0)
-                    else:         # 其他几个指头情况一样，如果指尖的Y坐标大于往下两个关节的Y坐标，即代表改关节弯曲
-                        if lmslist[tid][2] < lmslist[tid - 2][2]:
-                            fingers.append(1)
-                        else:
-                            fingers.append(0)
 
-            cnt = fingers.count(1)
+while True:
+    ret, img = cap.read()
+    lmslist = find_positon(img=img, ret=ret)
+    if len(lmslist):
+        fingers = []
+        if lmslist[1][1] < lmslist[0][1]:
+            for tid in fingertip:
+                if tid == 4:  # 即大指拇,如果大拇指指尖X坐标大于大拇指第二个关节X坐标，即代表大拇指折叠
+                    if lmslist[tid][1] > lmslist[tid - 1][1]:
+                        fingers.append(1)
+                    else:
+                        fingers.append(0)
+                else:         # 其他几个指头情况一样，如果指尖的Y坐标大于往下两个关节的Y坐标，即代表改关节弯曲
+                    if lmslist[tid][2] > lmslist[tid - 2][2]:
+                        fingers.append(1)
+                    else:
+                        fingers.append(0)
+        elif lmslist[1][1] == lmslist[0][1]:
+            for tid in fingertip:
+                if tid == 4:  # 即大指拇,如果大拇指指尖X坐标大于大拇指第二个关节X坐标，即代表大拇指折叠
+                    if lmslist[tid][2] < lmslist[tid - 1][2]:
+                        fingers.append(1)
+                    else:
+                        fingers.append(0)
+                else:         # 其他几个指头情况一样，如果指尖的Y坐标大于往下两个关节的Y坐标，即代表改关节弯曲
+                    if lmslist[tid][1] < lmslist[tid - 2][1]:
+                        fingers.append(1)
+                    else:
+                        fingers.append(0)
+        else:
+            for tid in fingertip:
+                if tid == 4:  # 即大指拇,如果大拇指指尖X坐标大于大拇指第二个关节X坐标，即代表大拇指折叠
+                    if lmslist[tid][1] < lmslist[tid - 1][1]:
+                        fingers.append(1)
+                    else:
+                        fingers.append(0)
+                else:         # 其他几个指头情况一样，如果指尖的Y坐标大于往下两个关节的Y坐标，即代表改关节弯曲
+                    if lmslist[tid][2] < lmslist[tid - 2][2]:
+                        fingers.append(1)
+                    else:
+                        fingers.append(0)
 
-            # 写入文档
-            file.write(str(cnt))
+        cnt = fingers.count(1)
 
-            # 记录弯曲数量
-            cv2.putText(img, str(cnt), (30, 150), cv2.FONT_HERSHEY_PLAIN, 5, (30, 60, 90), 3)
+        # 记录弯曲数量
+        cv2.putText(img, str(cnt), (30, 150), cv2.FONT_HERSHEY_PLAIN, 5, (30, 60, 90), 3)
 
-            # ser.write(values.get(cnt))
+        ser.write(values.get(cnt))
 
-            Ctime = time.time()#计算帧率
-            fps = 1/(Ctime-Ptime)
-            Ptime = Ctime
-            cv2.putText(img, f"FPS : {int(fps)}", (30, 50), cv2.FONT_HERSHEY_PLAIN, 2, (50, 160, 0), 3)
+        Ctime = time.time()#计算帧率
+        fps = 1/(Ctime-Ptime)
+        Ptime = Ctime
+        cv2.putText(img, f"FPS : {int(fps)}", (30, 50), cv2.FONT_HERSHEY_PLAIN, 2, (50, 160, 0), 3)
 
 
-        cv2.imshow('img', img)
-        if cv2.waitKey(1) == ord('q'):
-             break
+    cv2.imshow('img', img)
+    if cv2.waitKey(1) == ord('q'):
+         break
 
 
-# ser.close()
+ser.close()
 cap.release()
 cv2.destroyAllWindows()
